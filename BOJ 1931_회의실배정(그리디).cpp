@@ -1,46 +1,48 @@
-
-#include<stdio.h>
-#include<vector>
-#include<limits.h>
+#include <stdio.h>
+#include <vector>
+#include <algorithm>
 
 using namespace std;
 
-int n, m;
-int p[11];
-int minimum=INT_MAX;
+struct pp
+{
+    int st, en;
+} tmp;
+vector<pp> p;
+int n;
 
-void cal(int money, int now, int cnt){
-    //printf("%d %d %d\n",money,now,cnt);
-    if(money==0){
-        if(minimum>cnt) minimum=cnt;
-        return;
-    }
-    int i;
-    for(i=now-1;i>=0;i--){
-        if(p[i]>money) continue;
-        else{
-            cal(money%p[i], i, cnt + (money/p[i]));
-        }
-    }
+int compare(pp a, pp b)
+{
+    if (a.en == b.en)
+        return a.st < b.st;
+    else
+        return a.en < b.en;
 }
 
-int main(){
-    //freopen("./c++/input.txt", "r", stdin);
+int main()
+{
+    //freopen("./c++/input.txt","r",stdin);
 
     int i;
 
-    scanf("%d %d",&n,&m);
-
-    for(i=0; i<n; i++){
-        scanf("%d", &p[i]);
+    scanf("%d", &n);
+    for (i = 0; i < n; i++)
+    {
+        scanf("%d %d", &tmp.st, &tmp.en);
+        p.push_back(tmp);
     }
 
-    for(i=n-1; i>=0 ;i--){
-        if(p[i] > m) continue;
-        else{
-            //printf("!! %d %d\n",p[i],m);
-            cal(m%p[i], i, m/p[i]);
+    sort(p.begin(), p.end(), compare);
+    //for(i=0;i<n;i++) printf("%d %d\n",p[i].st,p[i].en);
+    int answer = 0;
+    int num = 0;
+    for (i = 0; i < n; i++)
+    {
+        if (p[i].st >= num)
+        {
+            num = p[i].en;
+            answer++;
         }
     }
-    printf("%d\n",minimum);
+    printf("%d\n", answer);
 }
