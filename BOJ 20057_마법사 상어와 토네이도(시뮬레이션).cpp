@@ -1,165 +1,92 @@
-#include<stdio.h>
+#include <stdio.h>
 
-int n, m, smell;
-int dir[401];
-struct sharks {
-	int x, y;
-	int dead;
-}s[401];
-int next[401][5][5];
+int n;
+int p[505][505];
 
-struct dist {
-	int num;
-	int cnt;
-}p[21][21];
+int dx[4][10] = {{-1, 1, -1, 1, 0, -2, 2, -1, 1, 0}, {1, 1, 0, 0, 2, 0, 0, -1, -1, 1}, {-1, 1, -1, 1, 0, -2, 2, -1, 1, 0}, {-1, -1, 0, 0, -2, 0, 0, 1, 1, -1}};
+int dy[4][10] = {{-1, -1, 0, 0, -2, 0, 0, 1, 1, -1}, {-1, 1, -1, 1, 0, -2, 2, -1, 1, 0}, {1, 1, 0, 0, 2, 0, 0, -1, -1, 1}, {-1, 1, -1, 1, 0, -2, 2, -1, 1, 0}};
+int dz[9] = {10, 10, 7, 7, 5, 2, 2, 1, 1};
 
-int main() {
-	//freopen("input.txt", "r", stdin);
+int main()
+{
+    //freopen("./c++/input.txt","r",stdin);
 
-	int i, j, k;
-	int a;
-	int answer = 0;
-	int count;
+    int i, j;
+    int x, y, num, cnt, phase;
+    int tmp, sum;
+    int answer = 0, ans = 0;
 
-	scanf("%d %d %d", &n, &m, &smell);
-	for (i = 1; i <= n; i++) {
-		for (j = 1; j <= n; j++) {
-			scanf("%d", &a);
-			if (a > 0) { s[a].x = i; s[a].y = j; p[i][j].num = a; p[i][j].cnt = smell; }
-		}
-	}
-	for (i = 1; i <= m; i++) scanf("%d", &dir[i]);
-	for (i = 1; i <= m; i++) {
-		for (j = 1; j <= 4; j++) {
-			for (k = 1; k <= 4; k++) scanf("%d", &next[i][j][k]);
-		}
-	}
+    scanf("%d", &n);
+    for (i = 2; i <= n + 1; i++)
+    {
+        for (j = 2; j <= n + 1; j++)
+        {
+            scanf("%d", &p[i][j]);
+            answer += p[i][j];
+        }
+    }
 
-	
-	count = m;
-	int next_dir, flag;
-	while (1) {
-		if (count == 1) break;
+    x = y = (2 + n + 1) / 2;
+    phase = num = 1;
+    cnt = 0;
 
-		answer++;
-		if (answer > 1000) { answer = -1; break; }
+    while (1)
+    {
+        if (phase == 1)
+            y--;
+        else if (phase == 2)
+            x++;
+        else if (phase == 3)
+            y++;
+        else if (phase == 4)
+            x--;
 
-		/*for (i = 1; i <= n; i++) {
-			for (j = 1; j <= n; j++) printf("%d(%d) ", p[i][j].num, p[i][j].cnt);
-			printf("\n");
-		}*/
+        if (x == 2 && y == 1)
+            break;
 
+        /*printf("%d %d\n",x-1,y-1);
+        for(i=2;i<=n+1;i++){
+            for(j=2;j<=n+1;j++) printf("%3d ",p[i][j]);
+            printf("\n");
+        }
+        printf("----------\n");*/
 
-		//상어이동
-		for (i = 1; i <= m; i++) {
-			if (s[i].dead == 1) continue;
+        //모래 이동
+        sum = 0;
+        for (i = 0; i < 9; i++)
+        {
+            tmp = (int)p[x][y] * dz[i] / 100;
+            p[x + dx[phase - 1][i]][y + dy[phase - 1][i]] += tmp;
+            sum += tmp;
+        }
+        p[x + dx[phase - 1][9]][y + dy[phase - 1][9]] += p[x][y] - sum;
+        p[x][y] = 0;
 
-			flag = 0;
+        /*printf("%d %d\n",x,y);
+        for(i=2;i<=n+1;i++){
+            for(j=2;j<=n+1;j++) printf("%4d ",p[i][j]);
+            printf("\n");
+        }
+        printf("----------\n");*/
 
-			//빈칸 찾기
-			for (j = 1; j <= 4; j++) {
-				next_dir = next[i][dir[i]][j];
-				if (next_dir == 1 && s[i].x - 1 >= 1 && p[s[i].x - 1][s[i].y].num == 0) {
-					dir[i] = next_dir;
-					s[i].x--;
-					flag = 1;
-					break;
-				}
-				else if (next_dir == 2 && s[i].x + 1 <= n && p[s[i].x + 1][s[i].y].num == 0) {
-					dir[i] = next_dir;
-					s[i].x++;
-					flag = 1;
-					break;
-				}
-				else if (next_dir == 3 && s[i].y - 1 >= 1 && p[s[i].x][s[i].y - 1].num == 0) {
-					dir[i] = next_dir;
-					s[i].y--;
-					flag = 1;
-					break;
-				}
-				else if (next_dir == 4 && s[i].y + 1 <= n && p[s[i].x][s[i].y + 1].num == 0) {
-					dir[i] = next_dir;
-					s[i].y++;
-					flag = 1;
-					break;
-				}
-			}
-			if (flag == 1) continue;
-			
+        cnt++;
+        if (num == cnt)
+        {
+            cnt = 0;
+            phase++;
+            if (phase == 5)
+                phase = 1;
 
-			//자신의 냄새가 있는 칸
-			for (j = 1; j <= 4; j++) {
-				next_dir = next[i][dir[i]][j];
-				if (next_dir == 1 && s[i].x - 1 >= 1 && p[s[i].x - 1][s[i].y].num == i) {
-					dir[i] = next_dir;
-					s[i].x--;
-					flag = 1;
-					break;
-				}
-				else if (next_dir == 2 && s[i].x + 1 <= n && p[s[i].x + 1][s[i].y].num == i) {
-					dir[i] = next_dir;
-					s[i].x++;
-					flag = 1;
-					break;
-				}
-				else if (next_dir == 3 && s[i].y - 1 >= 1 && p[s[i].x][s[i].y - 1].num == i) {
-					dir[i] = next_dir;
-					s[i].y--;
-					flag = 1;
-					break;
-				}
-				else if (next_dir == 4 && s[i].y + 1 <= n && p[s[i].x][s[i].y + 1].num == i) {
-					dir[i] = next_dir;
-					s[i].y++;
-					flag = 1;
-					break;
-				}
-			}
-		}
+            if (phase == 1 || phase == 3)
+                num++;
+        }
+    }
 
-		/*printf("상어 이동후\n");
-		for (i = 1; i <= m; i++) printf("%d %d  dead:%d\n", s[i].x, s[i].y, s[i].dead);
-		printf("\n");*/
+    for (i = 2; i <= n + 1; i++)
+    {
+        for (j = 2; j <= n + 1; j++)
+            ans += p[i][j];
+    }
 
-
-		//내쫓기
-		for (i = m; i > 1; i--) {
-			if (s[i].dead == 1) continue;
-			for (j = i-1; j >= 1; j--) {
-				if (s[j].dead == 1) continue;
-				if (i == j) continue;
-				if (s[i].x == s[j].x && s[i].y == s[j].y) {
-					s[i].dead = 1;
-					count--;
-					break;
-				}
-			}
-		}
-
-		/*printf("상어 내쫓은후\n");
-		for (i = 1; i <= m; i++) printf("%d %d  dead:%d\n", s[i].x, s[i].y, s[i].dead);
-		printf("count: %d\n",count);
-		printf("---------------------\n");*/
-
-		//냄새 1감소
-		for (i = 1; i <= n; i++) {
-			for (j = 1; j <= n; j++) {
-				if (p[i][j].cnt > 0) {
-					p[i][j].cnt--;
-					if (p[i][j].cnt == 0) p[i][j].num = 0;
-				}
-			}
-		}
-
-		//냄새뿌리기
-		for (i = 1; i <= m; i++) {
-			if (s[i].dead == 1) continue;
-
-			p[s[i].x][s[i].y].num = i;
-			p[s[i].x][s[i].y].cnt = smell;
-		}
-	}
-
-	printf("%d\n", answer);
-
+    printf("%d\n", answer - ans);
 }
