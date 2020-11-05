@@ -7,7 +7,7 @@ vector<int> p;
 
 int main()
 {
-    freopen("./c++/input.txt", "r", stdin);
+    //freopen("./c++/input.txt", "r", stdin);
 
     int i, j, num;
     int sum = 0;
